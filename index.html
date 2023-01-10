@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Chatbot</title>
+  </head>
+  <body>
+    <div id="chatbot-container">
+      <div id="chatbot-messages"></div>
+      <input id="chatbot-input" type="text" placeholder="Type your message here...">
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+      const API_KEY = "YOUR_API_KEY_HERE";
+      const chatbotContainer = document.getElementById("chatbot-container");
+      const chatbotMessages = document.getElementById("chatbot-messages");
+      const chatbotInput = document.getElementById("chatbot-input");
+
+      // Send a message to GPT-3
+      const sendMessage = async (text) => {
+        try {
+          const res = await axios.post("https://api.openai.com/v1/completions", {
+            prompt: text,
+            max_tokens: 2048,
+            temperature: 0.5,
+            model: "text-davinci-003"
+          }, {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer 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`
+            }
+          });
+          return res.data.choices[0].text;
+        } catch (error) {
+          console.error(error);
+        }
+      };
+
+      // Add a message to the chatbot
+      const addMessage = (text, isUser) => {
+        const messageWrapper = document.createElement("div");
+        messageWrapper.classList.add("chatbot-message");
+        if (isUser) {
+          messageWrapper.classList.add("chatbot-user");
+        }
+        messageWrapper.innerText = text;
+        chatbotMessages.appendChild(messageWrapper);
+        chatbotContainer.scrollTop = chatbotContainer.scrollHeight;
+      };
+
+      // Handle user input
+      chatbotInput.addEventListener("keydown", async (event) => {
+        if (event.keyCode === 13 && chatbotInput.value) {
+          addMessage(chatbotInput.value, true);
+          const response = await sendMessage(chatbotInput.value);
+          addMessage(response, false);
+          chatbotInput.value = "";
+        }
+      });
+    </script>
+  </body>
+</html>
